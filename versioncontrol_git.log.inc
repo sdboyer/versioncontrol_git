@@ -164,7 +164,7 @@ function _versioncontrol_git_log_parse($repository, &$logs, &$file_revisions, $b
     $message = '';
     while (($line = $next($logs)) !== FALSE) {
       if (trim($line) != '') {
-        $message .= trim($line);
+        $message .= trim($line) ."\n";
       }
       else {
         break;
