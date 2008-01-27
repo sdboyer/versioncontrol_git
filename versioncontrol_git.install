@@ -24,10 +24,8 @@ function versioncontrol_git_install() {
 
       db_query("CREATE TABLE {versioncontrol_git_repositories} (
         repo_id int unsigned NOT NULL default 0,
-        modules varchar(255) NOT NULL default '',
         update_method tinyint unsigned NOT NULL default 0,
         updated int unsigned NOT NULL default 0,
-        run_as_user varchar(255) NOT NULL default '',
         PRIMARY KEY (repo_id)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */");
 
@@ -73,10 +71,8 @@ function versioncontrol_git_install() {
 
       db_query("CREATE TABLE {versioncontrol_git_repositories} (
         repo_id int NOT NULL default 0,
-        modules varchar(255) NOT NULL default '',
         update_method smallint NOT NULL default 0,
         updated int NOT NULL default 0,
-        run_as_user varchar(255) NOT NULL default '',
         PRIMARY KEY (repo_id)
       )");
 

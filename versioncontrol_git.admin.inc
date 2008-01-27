@@ -52,8 +52,6 @@ function versioncontrol_git_versioncontrol_extract_repository_data($form_values)
   if (!isset($form_values['versioncontrol_git'])) {
     return array();
   }
-  $modules = trim($form_values['modules']);
-  $modules = empty($modules) ? array() : explode(' ', $modules);
 
   return array(
     'git_specific' => array(
