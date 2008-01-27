@@ -10,6 +10,7 @@
 
 // Update methods.
 define('VERSIONCONTROL_GIT_UPDATE_CRON', 0);
+define('VERSIONCONTROL_GIT_UPDATE_XGIT', 1);
 
 // The admin and user edit pages.
 include_once(drupal_get_path('module', 'versioncontrol_git') .'/versioncontrol_git.admin.inc');
