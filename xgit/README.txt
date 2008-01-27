@@ -43,7 +43,7 @@ xcvs-loginfo.php
 
   A script to insert all GIT log messages into your Drupal database
   by passing it to the Version Control API. (This is the post-commit hook.)
-  To enable this, you must add this line to your $GIT_DIR/hooks/post-commit file:
+  To enable this, you must add this line to your $GIT_DIR/hooks/post-update file:
 
 #!/bin/sh
 [path_to_.git]/hooks/xgit/xgit-loginfo.php [path_to_.git]/hooks/xgit/xgit-config.php
