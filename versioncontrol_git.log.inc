@@ -384,10 +384,10 @@ function _versioncontrol_git_log_process($repository, $file_revisions) {
 }
 
 /**
- * Get the previous commit id of file under version control,
+ * Get the previous revision (commit id) of file under version control,
  * given the repository id, path, and operation id.
  * 
- * @return string Previous commit id.
+ * @return string Previous revision (commit id).
  */
 function versioncontrol_git_get_previous_revision($repo_id, $path, $op_id) {
   $result = db_result(db_query(
