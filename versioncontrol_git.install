@@ -70,6 +70,7 @@ function versioncontrol_git_install() {
       db_query("CREATE TABLE {versioncontrol_git_item_source_revisions} (
         revision VARCHAR(255) NOT NULL,
         source_revision VARCHAR(255) NOT NULL,
+        repo_id int NOT NULL,
         PRIMARY KEY (revision)
       )  /*!40100 DEFAULT CHARACTER SET utf8 */");
       break;
@@ -130,6 +131,7 @@ function versioncontrol_git_install() {
       db_query("CREATE TABLE {versioncontrol_git_item_source_revisions} (
         revision VARCHAR(255) NOT NULL,
         source_revision VARCHAR(255) NOT NULL,
+        repo_id int NOT NULL,
         PRIMARY KEY (revision)
       )");
       break;
