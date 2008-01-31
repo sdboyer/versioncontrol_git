@@ -41,7 +41,7 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   $previous_count = 0;
   foreach ($latest_commits as $branch => $latest_commit) {
     // Generate either '[hash]..' or '..[branch]' or '[hash]..[branch]' as range specification for git log.
-    $range = $latest_commit ? ($latest_commit .'..') : '..';
+    $range = $latest_commit ? ($latest_commit .'..') : '';
     if (!in_array($branch, $obsolete_branches)) { // If the branch is obsolute then use it as the ending portion of the range.
       $range .= $branch;
     }
