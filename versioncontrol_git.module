@@ -194,7 +194,7 @@ function versioncontrol_git_get_commit_actions($commit) {
       );
     }
     if ($item_revision->action != VERSIONCONTROL_ACTION_ADDED) {
-      $source_revision = versioncontrol_git_get_previous_revision($commit['repository']['repo_id'], $item_revision->path, $commit['vc_op_id']);
+      $source_revision = versioncontrol_git_get_previous_revision($item_revision->revision);
       $action['source items'] = array(array(
         'type' => $item_revision->type,
         'path' => $item_revision->path,
