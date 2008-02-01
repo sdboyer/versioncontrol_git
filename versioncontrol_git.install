@@ -63,11 +63,11 @@ function versioncontrol_git_install() {
       ) /*!40100 DEFAULT CHARACTER SET utf8 */");
 
       db_query("CREATE TABLE {versioncontrol_git_latest_commits} (
-        last_commits_id int NOT NULL auto_increment,
+        lastest_commits_id int NOT NULL,
         branch_id int NOT NULL,
         revision varchar(255) NOT NULL,
         repo_id int(11) NOT NULL,
-        PRIMARY KEY (last_commits_id)
+        PRIMARY KEY (lastest_commits_id)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */");
 
       db_query("CREATE TABLE {versioncontrol_git_item_source_revisions} (
@@ -127,11 +127,11 @@ function versioncontrol_git_install() {
       )");
 
       db_query("CREATE TABLE {versioncontrol_git_latest_commits} (
-        last_commits_id int NOT NULL auto_increment,
+        lastest_commits_id int NOT NULL,
         branch_id int NOT NULL,
         revision varchar(255) NOT NULL,
         repo_id int(11) NOT NULL,
-        PRIMARY KEY (last_commits_id)
+        PRIMARY KEY (lastest_commits_id)
       )");
 
       db_query("CREATE TABLE {versioncontrol_git_item_source_revisions} (
