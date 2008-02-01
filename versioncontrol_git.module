@@ -600,7 +600,7 @@ function versioncontrol_git_commit($op, $commit, $commit_actions) {
       break;
 
     case 'delete':
-      $result = db_query('SELECT item_revision_id
+      $result = db_query('SELECT item_revision_id, revision
                           FROM {versioncontrol_git_item_revisions}
                           WHERE vc_op_id = %d', $commit['vc_op_id']);
 
@@ -611,6 +611,9 @@ function versioncontrol_git_commit($op, $commit, $commit_actions) {
       }
       db_query('DELETE FROM {versioncontrol_git_item_revisions}
                 WHERE vc_op_id = %d', $commit['vc_op_id']);
+      db_query("DELETE FROM {versioncontrol_git_item_source_revisions}
+                WHERE revision = '%s' OR source_revision = '%s'",
+                $revision->revision, $revision->revision);
       break;
   }
 }
