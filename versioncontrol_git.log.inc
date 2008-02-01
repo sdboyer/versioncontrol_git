@@ -158,7 +158,7 @@ function _versioncontrol_git_log_parse_branches(&$logs) {
 
   $branches = array();
   while (($line = $next($logs)) !== FALSE) {
-    if (preg_match('/([^*\s]+)$/', $line, $matches)) { // Remove whitespace and ensure that the active module symbol '*' doesn't get included.
+    if (preg_match('/([^\s]+)$/', $line, $matches)) { // Remove whitespace and ensure that the active module symbol '*' doesn't get included.
       $branches[] = $matches[1];
     }
   }
