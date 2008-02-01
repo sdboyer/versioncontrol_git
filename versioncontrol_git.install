@@ -33,6 +33,7 @@ function versioncontrol_git_install() {
         commit_branches_id int NOT NULL auto_increment,
         vc_op_id int NOT NULL,
         branch_id int NOT NULL,
+        repo_id int NOT NULL,
         PRIMARY KEY (commit_branches_id)
       ) /*!40100 DEFAULT CHARACTER SET utf8 */");
 
@@ -96,6 +97,7 @@ function versioncontrol_git_install() {
         commit_branches_id int NOT NULL auto_increment,
         vc_op_id int NOT NULL,
         branch_id int NOT NULL,
+        repo_id int NOT NULL,
         PRIMARY KEY (commit_branches_id)
       )");
 
