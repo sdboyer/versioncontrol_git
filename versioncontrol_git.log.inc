@@ -401,6 +401,10 @@ function _versioncontrol_git_log_parse($repository, &$logs, &$file_revisions, $b
   } // Loop to the next revision.
 }
 
+/**
+ * Get an already existing revision from the $file_revisions array with
+ * the specified revision hash.
+ */
 function _versioncontrol_git_log_get_duplicate_revision(&$file_revisions, $revision) {
 	foreach ($file_revisions as $file_revision) {
 		if ($file_revision->revision == $revision) {
