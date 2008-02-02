@@ -85,7 +85,7 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   $tags = _versioncontrol_git_log_get_tags();
   _versioncontrol_git_log_process_tags($repository, $tags);
 
-  // Update repository updated field.
+  // Update repository updated field. Displayed on administration interface for documentation purposes.
   $repository['git_specific']['updated'] = time();
   db_query('UPDATE {versioncontrol_git_repositories}
             SET updated = %d WHERE repo_id = %d',
