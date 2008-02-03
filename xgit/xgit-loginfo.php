@@ -49,7 +49,6 @@ function xgit_init($argc, $argv) {
     set_time_limit(3600);
   }
   _versioncontrol_git_update_repository($repository);
-  file_put_contents('/home/jimmy/software/git_test/code.txt', "\n". rand(), FILE_APPEND); // TODO temp
   exit(0);
 }
 
