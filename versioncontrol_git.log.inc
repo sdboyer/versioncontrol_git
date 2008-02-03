@@ -50,7 +50,7 @@ function _versioncontrol_git_log_update_repository(&$repository) {
     _versioncontrol_git_log_get_commits($repository, $file_revisions, $branch, $range);
 
     // If new revision set as latest revision.
-    if ($previous_count < count($file_revisions)) {
+    if (count($file_revisions) > $previous_count) {
       $latest_commits[$branch] = $file_revisions[$previous_count]->revision;
       $previous_count = count($file_revisions);
     }
