@@ -451,9 +451,8 @@ function _versioncontrol_git_log_process($repository, $file_revisions) {
           $vc_op_id, $branch_id));
 
         if ($count == 0) { // Add to branch.
-           $commit_branch_id = db_next_id('{versioncontrol_git_commit_branches}_commit_branches_id');
-           db_query("INSERT INTO {versioncontrol_git_commit_branches} (commit_branches_id, vc_op_id, branch_id, repo_id) VALUES (%d, %d, %d, %d)",
-             $commit_branch_id, $vc_op_id, $branch_id, $repository['repo_id']);
+           db_query("INSERT INTO {versioncontrol_git_commit_branches} (vc_op_id, branch_id) VALUES (%d, %d)",
+             $vc_op_id, $branch_id);
         }
       }
       continue;
