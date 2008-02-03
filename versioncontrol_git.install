@@ -160,4 +160,6 @@ function versioncontrol_git_uninstall() {
   db_query('DROP TABLE {versioncontrol_git_tag_operations}');
   db_query('DROP TABLE {versioncontrol_git_latest_commits}');
   db_query('DROP TABLE {versioncontrol_git_item_source_revisions}');
+
+  variable_del('versioncontrol_git_log_use_file');
 }
