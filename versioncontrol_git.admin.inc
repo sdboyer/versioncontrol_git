@@ -12,16 +12,16 @@
  * Implementation of hook_form_alter(): Add elements to various
  * administrative forms that the Version Control API provides.
  */
-function versioncontrol_git_form_alter($form_id, &$form) {
+function versioncontrol_git_form_alter(&$form, $form_state, $form_id) {
   if ($form['#id'] == 'versioncontrol-repository-form' && $form['#vcs'] == 'git') {
-    versioncontrol_git_repository_admin_form_alter($form_id, $form);
+    versioncontrol_git_repository_admin_form_alter($form, $form_state, $form_id);
   }
 }
 
 /**
  * Add Git specific elements to the add/edit repository form.
  */
-function versioncontrol_git_repository_admin_form_alter($form_id, &$form) {
+function versioncontrol_git_repository_admin_form_alter(&$form, $form_state, $form_id) {
   $repository = $form['#repository'];
 
   $form['versioncontrol_git'] = array(

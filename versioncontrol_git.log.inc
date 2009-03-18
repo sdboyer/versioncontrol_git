@@ -60,7 +60,7 @@ function _versioncontrol_git_log_update_repository(&$repository) {
     if ($branch_id !== NULL) {
       db_query('DELETE FROM {versioncontrol_git_latest_commits} WHERE branch_id = %d', $branch_id);
 
-      $lastest_commits_id = db_next_id('{versioncontrol_git_latest_commits}_lastest_commits_id');
+      $lastest_commits_id = db_last_insert_id('{versioncontrol_git_latest_commits}_lastest_commits_id');
       db_query("INSERT INTO {versioncontrol_git_latest_commits} (lastest_commits_id, repo_id, branch_id, revision) VALUES (%d, %d, %d, '%s')",
         $lastest_commits_id, $repository['repo_id'], $branch_id, $latest_commits[$branch]);
     }
