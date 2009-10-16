@@ -44,6 +44,7 @@ function _versioncontrol_git_log_update_repository(&$repository) {
     $branches[$branch_name] = $label_ret;
   }
   //jpetso and me (corni) came to the conclusion that we will not delete branches.
+  // TODO: revisit this!
   // Record new commits.
   $constraints = array(
     'vcs' => array('git'),
@@ -53,12 +54,16 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   );
   $branches_per_commit = array();
   $existing_revs = array();
-  // We cache the array in a temporary file to avoid the huge query when someone checks for new commits.
-  $cached = _versioncontrol_git_get_cache($repository, $existing_revs);
+  // Get the existing revisions from the cache.
+  $cache_object = cache_get('versioncontrol_git_rev_cache');
+  // Check wether the cache object exists or not.
+  if (is_object($cache_object)) {
+    $existing_revs = $cache_object->data;
+  }
   // Get the list of current branches from Git.
   // Generate the range per branch with which git shall be called.
   foreach ($branches as $branch_name => $label) {
-    if (!$cached) {
+    if (is_object($cache_object)) {
       // We get all commits we have in this branch to not process them later.
       $constraints['branches'] = array($branch_name);
       $latest_commit_date = 0;
@@ -119,47 +124,9 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   db_query('UPDATE {versioncontrol_git_repositories}
             SET updated = %d, locked = 0 WHERE repo_id = %d',
             $repository['git_specific']['updated'], $repository['repo_id']);
-  _versioncontrol_git_write_cache($repository, $existing_revs);
-  return TRUE;
-}
 
-/**
- * Writes our existing_revs array to a file.
- */
-function _versioncontrol_git_write_cache(&$repository, &$existing_revs) {
-  $file = "<?php\n" .'$_versioncontrol_git_cache_var = ';
-  $file .= var_export($existing_revs, TRUE);
-  $file .= ';';
-  $path = '';
-  if (!file_exists($repository['git_specific']['cache_path'])) {
-    $key = sha1(mt_rand() + mt_rand());
-    $path = file_directory_temp();
-    file_check_directory($path, 3);
-    $path .= '/versioncontrol_git_cache_'. $key .'.php';
-    $repository['git_specific']['cache_path'] = $path;
-    db_query('UPDATE {versioncontrol_git_repositories}
-            SET cache_path = \'%s\' WHERE repo_id = %d',
-    serialize($path), $repository['repo_id']);
-  }
-  $path = $repository['git_specific']['cache_path'];
-  // Lock the file, as we may else have concurrent writes to the file, which would be *very* bad.
-  file_put_contents($path, $file, LOCK_EX);
-}
-
-/**
- * This function loads the array $existing_revs with the cache file from $repository.
- */
-function _versioncontrol_git_get_cache($repository, &$existing_revs) {
-  $path = $repository['git_specific']['cache_path'];
-  if (file_exists($path)) {
-    include $path;
-    $existing_revs = $_versioncontrol_git_cache_var;
-    unset($_versioncontrol_git_cache_var);
-  }
-  else {
-    $existing_revs = array();
-    return FALSE;
-  }
+  // Write back the cache.
+  cache_set('versioncontrol_git_rev_cache', $existing_revs);
   return TRUE;
 }
 
@@ -233,7 +200,7 @@ function _versioncontrol_git_log_parse_tag_info($repository, &$logs, $tag_commit
   if ($line == 'commit') {
     //let's get the author and the date from the tagged commit, better than nothing.
     $tagged_commit = next($logs); // Get the tagged commit
-    $tag_name = next($logs); // Get the name of the tag
+    $tag_name = substr(strrchr(next($logs), '/'), 1 ); // Get the name of the tag based on %(refname)
     next($logs); // Skip these two lines
     next($logs);
     // Get the tag/commit message
@@ -274,7 +241,7 @@ function _versioncontrol_git_log_parse_tag_info($repository, &$logs, $tag_commit
     );
   }
   $line = next($logs); // Skip op sha1
-  $tag_name = next($logs); // Get tag name
+  $tag_name = substr(strrchr(next($logs), '/'), 1 ); // Get the name of the tag based on %(refname)
   $tagger = next($logs); // Get tagger
   $date = strtotime(next($logs)); // Get date
   // Get the tag message
@@ -325,7 +292,7 @@ function _versioncontrol_git_get_tag_operations($repository, $tags) {
   foreach ($tags as $tag) {
     $tag_string .= escapeshellarg("refs/tags/$tag") .' ';
   }
-  $format = "%(objecttype)\n%(objectname)\n%(refname:short)\n%(taggername) %(taggeremail)\n%(taggerdate)\n%(contents)\nENDOFGITTAGOUTPUTMESAGEHERE";
+  $format = "%(objecttype)\n%(objectname)\n%(refname)\n%(taggername) %(taggeremail)\n%(taggerdate)\n%(contents)\nENDOFGITTAGOUTPUTMESAGEHERE";
   $exec = "git for-each-ref --format=\"$format\" $tag_string";
   $logs_tag_msg = _versioncontrol_git_log_exec($exec);
   $exec = "git show-ref -d $tag_string";
@@ -481,7 +448,7 @@ function _versioncontrol_git_insert_commit($repository, $date, $username, $messa
   versioncontrol_insert_operation($op, $op_items);
 }
 
-function _versioncontrol_git_parse_items($repository, &$logs, &$line, $revision, &$branches_per_commit, $parents) {
+function _versioncontrol_git_parse_items($repository, &$logs, &$line, $revision, &$branches_per_commit, $parents, $merge) {
   $op_items = array();
   $read = FALSE;
 
@@ -497,7 +464,7 @@ function _versioncontrol_git_parse_items($repository, &$logs, &$line, $revision,
           'action' => $merge ? VERSIONCONTROL_ACTION_MERGED : VERSIONCONTROL_ACTION_MODIFIED,
           'revision' => $revision
       );
-      if (is_numeric($matches[1] && is_numeric($matches[2]))) {
+      if (is_numeric($matches[1]) && is_numeric($matches[2])) {
         $op_items[$path]['line_changes'] = array(
             'added' => $matches[1],
             'removed' => $matches[2]
@@ -637,7 +604,7 @@ function _versioncontrol_git_log_parse_commits($repository, &$logs, &$branches_p
   $line = next($logs); // Points to either the next entry or the first items modified or to the file actions
   // Get the items
   $op_items = _versioncontrol_git_parse_items($repository, $logs, $line, $revision,
-  $branches_per_commit, $parents);
+  $branches_per_commit, $parents, $merge);
 
   _versioncontrol_git_insert_commit($repository, $date, $username,
   $message, $revision, $branches_per_commit[$revision], $op_items);
