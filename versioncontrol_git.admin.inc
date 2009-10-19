@@ -23,7 +23,7 @@ function versioncontrol_git_form_alter(&$form, $form_state, $form_id) {
  * Add Git specific elements to the add/edit repository form.
  */
 function versioncontrol_git_repository_admin_form_alter(&$form, $form_state, $form_id) {
-  $repository = $form['#repository'];
+  $repository = isset($form['#repository'])? $form['#repository']: null;
 
   $form['versioncontrol_git'] = array(
     '#type' => 'value',
