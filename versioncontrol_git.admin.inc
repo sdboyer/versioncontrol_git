@@ -34,7 +34,7 @@ function versioncontrol_git_repository_admin_form_alter(&$form, $form_state, $fo
     '#title' => t('Update method'),
     '#description' => t('Automatic log retrieval requires cron.'),
     '#default_value' => !is_null($repository)
-                        ? $repository['data']['versioncontrol_git']['update_method']
+                        ? $repository->data['versioncontrol_git']['update_method']
                         : VERSIONCONTROL_GIT_UPDATE_CRON,
     '#weight' => 9,
     '#options' => array(
@@ -55,7 +55,7 @@ function versioncontrol_git_versioncontrol_repository_submit(&$repository, $form
   }
 
   $update_method = (int)$form_state['values']['update_method'];
-  $repository['data']['versioncontrol_git']['update_method'] = $update_method;
+  $repository->data['versioncontrol_git']['update_method'] = $update_method;
 }
 
 /**
