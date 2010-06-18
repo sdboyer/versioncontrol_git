@@ -9,10 +9,6 @@
  * Copyright 2009 by Cornelius Riemenschneider ("CorniI", http://drupal.org/user/136353)
  */
 
-include_once(drupal_get_path('module', 'versioncontrol') .'/includes/VersioncontrolBranch.php');
-include_once(drupal_get_path('module', 'versioncontrol') .'/includes/VersioncontrolOperation.php');
-include_once(drupal_get_path('module', 'versioncontrol') .'/includes/VersioncontrolItem.php');
-
 /**
  * Actually update the repository by fetching commits and other stuff
  * directly from the repository, invoking the git executable.
@@ -23,10 +19,7 @@ include_once(drupal_get_path('module', 'versioncontrol') .'/includes/Versioncont
  */
 function _versioncontrol_git_log_update_repository(&$repository) {
   $root = escapeshellcmd($repository->root);
-  $chdir_ok = @chdir($root); // Set working directory to root.
-  if ($chdir_ok === FALSE) {
-    return FALSE;
-  }
+  putenv("GIT_DIR=$root/.git");
   if ($repository->data['versioncontrol_git']['locked'] == TRUE) {
     drupal_set_message(t('This repository is locked, there is already a fetch in progress. If this is not the case, press the clear lock button.'), 'error');
     return FALSE;
