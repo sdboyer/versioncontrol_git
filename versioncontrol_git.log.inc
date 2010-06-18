@@ -60,12 +60,12 @@ function _versioncontrol_git_log_update_repository(&$repository) {
       // We get all commits we have in this branch to not process them later.
       $constraints['branches'] = array($branch_name);
       $latest_commit_date = 0;
-      $commit_op = VersioncontrolOperationCache::getInstance()->getOperations($constraints);
+      $commit_ops = VersioncontrolOperationCache::getInstance()->getOperations($constraints);
       $latest_commit = FALSE;
-      foreach ($commit_op as $vc_op_id => $c_op) {
-        if ($latest_commit_date < $c_op['date']) {
-          $latest_commit = $c_op['revision'];
-          $latest_commit_date = $c_op['date'];
+      foreach ($commit_ops as $vc_op_id => $commit_op) {
+        if ($latest_commit_date < $commit_op['date']) {
+          $latest_commit = $commit_op['revision'];
+          $latest_commit_date = $commit_op['date'];
           $existing_revs[$branch_name][$latest_commit] = TRUE;
         }
       }
@@ -118,7 +118,7 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   $repository->update();
 
   // Write back the cache.
-  cache_set('versioncontrol_git_rev_cache', $existing_revs);
+  // cache_set('versioncontrol_git_rev_cache', $existing_revs);
   return TRUE;
 }
 
