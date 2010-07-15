@@ -44,7 +44,7 @@ function versioncontrol_git_autoload_info() {
   $names = array('Backend', 'Repository', 'Account', 'Operation', 'Item');
   foreach ($names as $name) {
     $items["VersioncontrolGit$name"] = array(
-      'file' => "includes/$name.php",
+      'file' => "includes/VersioncontrolGit$name.php",
     );
   }
   return $items;
