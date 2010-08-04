@@ -47,22 +47,22 @@ class VersioncontrolGitRepository extends VersioncontrolRepository {
    * the SHA1 of the current branch tip and the branch name.
    */
   public function fetchBranches() {
-    $this->setEnv();
-    $retrieved_branches = $branches = array();
-    foreach (versioncontrol_git_log_exec('git show-ref --heads') as $branchdata) {
-      $retrieved_branches[] = explode(' ', $branchdata);
-    }
+    $branches = array();
 
     $data = array(
       'repo_id' => $this->repo_id,
       'action' => VERSIONCONTROL_ACTION_MODIFIED,
       'label_id' => NULL,
     );
-    foreach ($retrieved_branches as $branch_name) {
-      $data['name'] = $branch_name;
-      $branches[$branch_name] = new VersioncontrolBranch($this->backend);
-      $branches[$branch_name]->build($data);
+    foreach ($this->exec('git show-ref --heads') as $branchdata) {
+      list($data['tip'], $data['name']) = explode(' ', $branchdata);
+      $data['name'] = substr($data['name'], 11);
+      if (!empty($data['name'])) { // null chars can sneak in, causing empties.
+        $branches[$data['name']] = new VersioncontrolBranch($this->backend);
+        $branches[$data['name']]->build($data);
+      }
     }
+
     return $branches;
   }
 
@@ -79,7 +79,7 @@ class VersioncontrolGitRepository extends VersioncontrolRepository {
       $this->setEnv();
     }
     $logs = array();
-    exec($command, $logs);
+    exec($cmds, $logs);
     array_unshift($logs, '');
     reset($logs); // Reset the array pointer, so that we can use next().
     return $logs;
