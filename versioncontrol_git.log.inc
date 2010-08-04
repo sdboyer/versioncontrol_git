@@ -12,7 +12,7 @@
 /**
  * Actually update the repository by fetching commits and other stuff
  * directly from the repository, invoking the git executable.
- * @param $repository
+ * @param VersioncontrolGitRepository $repository
  * @return
  *   TRUE if the logs were updated, or FALSE if fetching and updating the logs
  *   failed for whatever reason.
@@ -27,10 +27,10 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   // $repository->data['versioncontrol_git']['locked'] = 1;
   // $repository->update();
 
-  $branches_in_repo = _versioncontrol_git_log_get_branches_in_repo();
-  $branches_in_db = _versioncontrol_git_log_get_branches_in_db($repository);
-  $branches_new = array_diff($branches_in_repo, $branches_in_db);
-  $branches_deleted = array_diff($branches_in_db, $branches_in_repo);
+  $branches_in_repo = $repository->fetchBranches();
+  $branches_in_db = $repository->loadBranches(array(), array(), array('idkey' => 'name'));
+  $branches_new = array_diff_key($branches_in_repo, $branches_in_db);
+  $branches_deleted = array_diff_key($branches_in_db, $branches_in_repo);
 
   // Insert new branches in the repository. Later all commits in these new
   // branches will be updated.
@@ -40,17 +40,8 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   // we don't know anything about the branch. This is all stuff a hook could
   // figure out.
   // Here we will just ensure that each branch is in the database.
-  foreach($branches_new as $branch_name) {
-  	$label = new VersioncontrolBranch($branch_name,
-      VERSIONCONTROL_ACTION_MODIFIED, NULL, $repository);
-    $label->ensure();
-  }
-
-  // Later we need a list of $branch => VersioncontrolBranch so construct it here
-  $branch_labels_in_db = $repository->getLabels(array('type' => VERSIONCONTROL_LABEL_BRANCH));
-  $branch_label_list = array();
-  foreach($branch_labels_in_db as $label) {
-    $branch_label_list[$label->name] = $label;
+  foreach($branches_new as $branch) {
+    $branch->ensure();
   }
 
   // Deleted branches are removed, commits in them are not!
@@ -60,7 +51,7 @@ function _versioncontrol_git_log_update_repository(&$repository) {
     db_query('DELETE FROM {versioncontrol_labels}
               WHERE repo_id = %d AND type = %d AND label_id = %d',
               $repository->repo_id, VERSIONCONTROL_LABEL_BRANCH,
-              $branch_label_list[$branch_name]->label_id);
+              $branches_in_db[$branch_name]->label_id);
   }
 
   $commits_in_db = _versioncontrol_git_log_get_commits_in_db($repository);
@@ -70,13 +61,13 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   // Insert new commits in the database.
   foreach($commits_new as $new_commit) {
     $new_commit_data = _versioncontrol_git_log_get_raw_commit_data($new_commit);
-    _versioncontrol_git_log_parse_and_insert_commit($repository, $new_commit_data, $commits_in_db, $branch_label_list);
+    _versioncontrol_git_log_parse_and_insert_commit($repository, $new_commit_data, $commits_in_db, $branches_in_db);
   }
 
   // Add a new branch to all commits contained in that branch.
   foreach($branches_new as $branch_new) {
   	$commits = _versioncontrol_git_log_get_commits_in_branch($branch_new);
-  	_versioncontrol_git_log_attach_branch_to_commits($branch_label_list[$branch_new], $commits);
+    _versioncontrol_git_log_attach_branch_to_commits($branches_in_db[$branch_new], $commits);
   }
 
   // Insert new tags in the database.
@@ -378,31 +369,6 @@ function _versioncontrol_git_log_parse_and_insert_commit($repository, $logs, &$c
 
 
 /// All branch related functions
-
-/**
- * Returns a list of all existing branches in the database.
- * @param VersioncontrolRepository $repository
- * @return array An array of branch names.
- */
-function _versioncontrol_git_log_get_branches_in_db($repository) {
-  return _versioncontrol_git_log_get_labels_in_db($repository, VERSIONCONTROL_LABEL_BRANCH);
-}
-
-/**
- * Get branches from Git using 'branch -l' command.
- * @return array List of branches.
- */
-function _versioncontrol_git_log_get_branches_in_repo() {
-  $logs = _versioncontrol_git_log_exec('git show-ref --heads'); // Query branches.
-  $branches = array();
-  while (($line = next($logs)) !== FALSE) {
-  	// the output of git show-ref --heads looks like this
-  	// c5bbe46edb29eb6142942ba971a51dc9d5becbc0 refs/heads/master
-  	// to get 'master', we have to skip 52 chars.
-    $branches[] = substr(trim($line), 52);
-  }
-  return $branches;
-}
 
 /**
  * Attaches the label $branch to every commit if it is not there yet.
