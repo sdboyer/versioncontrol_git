@@ -84,7 +84,7 @@ function versioncontrol_git_menu() {
  */
 function versioncontrol_git_cron() {
   $constraints = array( 'vcs' => array('git') );
-  $git_repositories = VersioncontrolRepositoryCache::getInstance()->getRepositories($constraints);
+  $git_repositories = versioncontrol_repository_load_multiple(array(), $constraints);
 
   // Set timeout limit to 3600 seconds as it can take a long time to process
   // the log initially. (And hook_cron() might be called by poormanscron.)
@@ -137,7 +137,7 @@ function _versioncontrol_git_get_branch_intersect($repository, $item1, $item2) {
  */
 function versioncontrol_git_clearlock_repository_callback($repo_id) {
   if (is_numeric($repo_id)) {
-    $repository = VersioncontrolRepositoryCache::getInstance()->getRepository($repo_id);
+    $repository = versioncontrol_repository_load($repo_id);
     $repository->data['versioncontrol_git']['locked'] = 0;
     $repository->update();
     drupal_set_message(t('Cleared the lock for the repository.'));
@@ -154,7 +154,7 @@ function versioncontrol_git_clearlock_repository_callback($repo_id) {
  */
 function versioncontrol_git_update_repository_callback($repo_id) {
   if (is_numeric($repo_id)) {
-    $repository = VersioncontrolRepositoryCache::getInstance()->getRepository($repo_id);
+    $repository = versioncontrol_repository_load($repo_id);
 
     if (isset($repository)) {
       $update_method = $repository->data['versioncontrol_git']['update_method'];
