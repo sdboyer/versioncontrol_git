@@ -27,8 +27,16 @@ function _versioncontrol_git_log_update_repository(&$repository) {
   // $repository->data['versioncontrol_git']['locked'] = 1;
   // $repository->update();
 
+  // Fetch branches from the repo and load them from the db.
   $branches_in_repo = $repository->fetchBranches();
-  $branches_in_db = $repository->loadBranches(array(), array(), array('idkey' => 'name'));
+  $bdb = $repository->loadBranches();
+  $branches_in_db = array();
+  foreach ($bdb as $branch) { // Branches get keyed on id; key on name instead.
+    $branches_in_db[$branch->name] = $branch;
+  }
+  unset($bdb);
+
+  // Determine whether we've got branch changes to make.
   $branches_new = array_diff_key($branches_in_repo, $branches_in_db);
   $branches_deleted = array_diff_key($branches_in_db, $branches_in_repo);
 
