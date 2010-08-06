@@ -54,7 +54,8 @@ class VersioncontrolGitRepository extends VersioncontrolRepository {
       'action' => VERSIONCONTROL_ACTION_MODIFIED,
       'label_id' => NULL,
     );
-    foreach ($this->exec('git show-ref --heads') as $branchdata) {
+    $logs = $this->exec('git show-ref --heads');
+    while (($branchdata = next($logs) !== FALSE)) {
       list($data['tip'], $data['name']) = explode(' ', trim($branchdata));
       $data['name'] = substr($data['name'], 11);
       if (!empty($data['name'])) { // null chars can sneak in, causing empties.
