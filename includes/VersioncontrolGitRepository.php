@@ -68,6 +68,40 @@ class VersioncontrolGitRepository extends VersioncontrolRepository {
   }
 
   /**
+   * Invoke git to fetch a list of local tags in the repository, including
+   * the SHA1 of the commit to which the tag is attached.
+   */
+  public function fetchTags() {
+    $tags = array();
+    $data = array(
+      'repo_id' => $this->repo_id,
+      'action' => VERSIONCONTROL_ACTION_MODIFIED,
+      'label_id' => NULL,
+    );
+
+    $logs = $this->exec('git show-ref --tags');
+    while (($tagdata = next($logs) !== FALSE)) {
+      list($data['tip'], $data['name']) = explode(' ', trim($tagdata));
+      $data['name'] = substr($data['name'], 10);
+      if (!empty($data['name'])) { // null chars can sneak in, causing empties.
+        $tags[$data['name']] = new VersioncontrolBranch();
+        $tags[$data['name']]->build($data);
+      }
+    }
+
+    return $tags;
+  }
+
+  public function fetchCommits($branch_name = NULL) {
+    $logs = $this->exec('git rev-list ' . (empty($branch_name) ? '--all' : $branch_name));
+    $commits = array();
+    while (($line = next($logs)) !== FALSE) {
+      $commits[] = trim($line);
+    }
+    return $commits;
+  }
+
+  /**
    * Execute a Git command using the root context and the command to be
    * executed.
    *
